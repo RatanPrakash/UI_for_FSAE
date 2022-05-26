@@ -1,8 +1,14 @@
+from runpy import run_module
 import pygame , sys
 import subprocess
 from button import Button
 
+# todo Initializing PyGame and Joystick
 pygame.init()
+pygame.joystick.init()
+_joystick = pygame.joystick.Joystick(0)
+_joystick.init()
+
 
 SCREEN = pygame.display.set_mode((1280, 720))
 pygame.display.set_caption("TDR-SDC FSAE Italy")
@@ -33,9 +39,10 @@ def play(mission):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+            if _joystick.get_button(0):
                 if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
                     subprocess.run("pkill ros", shell=True)
+                    _joystick.rumble(0.3,0.9,1500)
                     SCREEN.fill("black")
                     endStr = "Mission {0} is now CLOSING...".format(mission)
                     waitStr = "PLEASE WAIT!!!"
@@ -58,7 +65,6 @@ def main_menu():
     MENU_MOUSE_POS = (x, y)  ## Initialised to 1st option
     while True:
         MENU_MOUSE_POS = (x, y)
-        print(MENU_MOUSE_POS)
         SCREEN.blit(BG, (0, 0))
 
         MENU_TEXT = get_font(60).render("MAIN MENU", True, "#b68f40")
@@ -86,41 +92,48 @@ def main_menu():
                 button.changeColor(MENU_MOUSE_POS)
                 button.update(SCREEN)
 
-        
+        hat = _joystick.get_hat(0)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_DOWN:
-                    if y >= 620:
-                        y = 200
-                    else:
-                        y = y + 70
+            if hat[1] == -1:
+                # if event.key == pygame.K_DOWN:
+                if y >= 620:
+                    y = 200
+                else:
+                    y = y + 70
 
-                if event.key == pygame.K_UP:
-                    if y <= 200:
-                        y = 620
-                    else:
-                        y = y - 70
-        
+            if hat[1] == 1:
+                if y <= 200:
+                    y = 620
+                else:
+                    y = y - 70
+    
 
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+            if _joystick.get_button(0):
                 
                 if ACCELERATION.checkForInput(MENU_MOUSE_POS):
+                    _joystick.rumble(0.3,0.9,500)
                     play("Acceleration")
                 if SKID_PAD.checkForInput(MENU_MOUSE_POS):
+                    _joystick.rumble(0.3,0.9,500)
                     play("Skid-Pad")
                 if TRACK_DRIVE.checkForInput(MENU_MOUSE_POS):
+                    _joystick.rumble(0.3,0.9,500)
                     play("TrackDrive")
                 if AUTOCROSS.checkForInput(MENU_MOUSE_POS):
+                    _joystick.rumble(0.3,0.9,500)
                     play("Autocross")
                 if EBS_TEST.checkForInput(MENU_MOUSE_POS):
+                    _joystick.rumble(0.3,0.9,500)
                     play("EBS Test")
                 if INSPECTION.checkForInput(MENU_MOUSE_POS):
+                    _joystick.rumble(0.3,0.9,500)
                     play("Inspection")
                 if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                    _joystick.rumble(0.3,0.9,500)
                     pygame.quit()
                     sys.exit()
 
